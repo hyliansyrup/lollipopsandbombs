@@ -1,0 +1,683 @@
+<html><head><base href="https://websim.ai/lollipops-and-bombs-v13/">
+<title>Lollipops and Bombs v13</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bubblegum+Sans&family=Fredoka+One&display=swap');
+
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Fredoka One', cursive;
+    overflow: hidden;
+    background: linear-gradient(to bottom, #87CEEB, #E0FFFF, #FFB6C1);
+    animation: sky-gradient 20s ease infinite;
+    user-select: none;
+  }
+  @keyframes sky-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  #game-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  #player {
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    pointer-events: none;
+    transition: all 0.1s ease-out;
+    z-index: 1000;
+  }
+  .item {
+    width: 60px;
+    height: 60px;
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    transition: transform 0.2s ease-in-out;
+  }
+  .item:hover {
+    transform: scale(1.1);
+  }
+  .lollipop {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="lollipopGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:%23FF69B4;stop-opacity:1" /><stop offset="100%" style="stop-color:%23FFB6C1;stop-opacity:1" /></linearGradient></defs><circle cx="50" cy="35" r="30" fill="url(%23lollipopGradient)"/><rect x="48" y="60" width="4" height="35" fill="%23A0522D"/></svg>');
+    animation: spin 3s linear infinite;
+  }
+  .bomb {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><radialGradient id="bombGradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="0%" style="stop-color:%23666;stop-opacity:1" /><stop offset="100%" style="stop-color:%23333;stop-opacity:1" /></radialGradient></defs><circle cx="50" cy="60" r="35" fill="url(%23bombGradient)"/><polygon points="50,25 45,5 55,5" fill="%23FF0000"/><circle cx="65" cy="45" r="5" fill="%23FFF" opacity="0.6"/></svg>');
+    animation: shake 0.5s linear infinite;
+  }
+  .health-potion {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="potionGradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%2300FF00;stop-opacity:1" /><stop offset="100%" style="stop-color:%23008000;stop-opacity:1" /></linearGradient></defs><path d="M40,20 h20 v20 q20,0 20,20 v30 q0,10 -10,10 h-40 q-10,0 -10,-10 v-30 q0,-20 20,-20 z" fill="url(%23potionGradient)"/><rect x="45" y="5" width="10" height="15" fill="%23A0522D"/></svg>');
+    animation: float 2s ease-in-out infinite;
+  }
+  @keyframes spin {
+    100% { transform: rotate(360deg); }
+  }
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-2px) rotate(-5deg); }
+    50% { transform: translateX(0) rotate(5deg); }
+    75% { transform: translateX(2px) rotate(-5deg); }
+    100% { transform: translateX(0) rotate(5deg); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .cloud {
+    position: absolute;
+    opacity: 0.7;
+    animation: float 30s linear infinite;
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
+  }
+  @keyframes float {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+  }
+  #ui {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 18px;
+    color: #666;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  #game-over, #level-complete, #start-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    display: none;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  }
+  #restart-btn, #next-level-btn, #start-btn {
+    margin-top: 20px;
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #007AFF;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+  }
+  #restart-btn:hover, #next-level-btn:hover, #start-btn:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+  }
+  #pause-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 20px;
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #FF69B4;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+  }
+  #pause-btn:hover {
+    background-color: #FF1493;
+    transform: scale(1.05);
+  }
+  .explosion {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23FF4500"/><circle cx="50" cy="50" r="30" fill="%23FFA500"/><circle cx="50" cy="50" r="20" fill="%23FFFF00"/></svg>');
+    background-size: contain;
+    animation: explode 0.5s forwards;
+    z-index: 100;
+  }
+  @keyframes explode {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+  .sparkle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background-color: white;
+    border-radius: 50%;
+    animation: twinkle 1s infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+  #landscape {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100px;
+    background: linear-gradient(to top, #228B22, #32CD32);
+    z-index: -1;
+  }
+  .tree {
+    position: absolute;
+    bottom: 100px;
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 100px solid #228B22;
+  }
+  .confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #f0f;
+    animation: confetti-fall 4s ease-out infinite;
+  }
+  @keyframes confetti-fall {
+    0% { transform: translateY(-100vh) rotate(0deg); }
+    100% { transform: translateY(100vh) rotate(720deg); }
+  }
+  #objectives {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 15px;
+    border-radius: 15px;
+    font-size: 16px;
+    color: #666;
+  }
+  .bubble {
+    position: absolute;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
+    border-radius: 50%;
+    animation: rise 10s infinite ease-in;
+    z-index: -1;
+  }
+  @keyframes rise {
+    0% {
+      transform: translateY(100%) scale(0);
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(-100vh) scale(1);
+      opacity: 0;
+    }
+  }
+  #game-title {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 48px;
+    font-weight: bold;
+    font-family: 'Bubblegum Sans', cursive;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    animation: rainbow-text 5s linear infinite, bubble 2s ease-in-out infinite;
+    transition: opacity 0.5s ease-in-out;
+  }
+  @keyframes rainbow-text {
+    0% { color: #ff9a9e; }
+    20% { color: #fad0c4; }
+    40% { color: #ffecd2; }
+    60% { color: #fcb69f; }
+    80% { color: #fda085; }
+    100% { color: #ff9a9e; }
+  }
+  @keyframes bubble {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.1); }
+  }
+  .title-sparkle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #fff;
+    border-radius: 50%;
+    animation: title-sparkle-anim 2s infinite;
+    opacity: 0;
+  }
+  @keyframes title-sparkle-anim {
+    0%, 100% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1); opacity: 1; }
+  }
+  #credits {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 12px;
+    color: #666;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <h1 id="game-title">Lollipops and Bombs</h1>
+  <div id="player">
+    <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExMTI3bDZvYWMybmQ5ZzlqeGlhYnh2MmJwM3NpaDV4aGFnN3V4dTdoNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/BQOpUKLcHhvQ6okAin/giphy.webp" alt="Cute cat gif" style="width: 100%; height: 100%; object-fit: contain;">
+  </div>
+  <div id="ui">
+    Score: <span id="score">0</span><br>
+    Health: <span id="health">0</span>/100<br>
+    Time: <span id="time">60</span><br>
+    Level: <span id="level">1</span><br>
+    Lollipops Caught: <span id="lollipops-caught">0</span><br>
+    Bombs Caught: <span id="bombs-caught">0</span><br>
+    Potions Caught: <span id="potions-caught">0</span>
+  </div>
+  <div id="objectives">
+    <h3>Objectives:</h3>
+    <p>Score to reach: <span id="score-objective">300</span></p>
+    <p>Time left: <span id="time-left">60</span> seconds</p>
+  </div>
+  <button id="pause-btn">Pause</button>
+  <div id="game-over">
+    <h2>Game Over</h2>
+    <p>Your score: <span id="final-score"></span></p>
+    <button id="restart-btn">Restart</button>
+  </div>
+  <div id="level-complete">
+    <h2>Level Complete!</h2>
+    <p>Your score: <span id="level-score"></span></p>
+    <button id="next-level-btn">Next Level</button>
+  </div>
+  <div id="start-screen">
+    <h2>Lollipops and Bombs</h2>
+    <p>Catch lollipops, avoid bombs, and collect health potions!</p>
+    <button id="start-btn">Start Game</button>
+  </div>
+  <div id="landscape"></div>
+  <div id="credits">
+    Cat character by @MiuuStudio<br>
+    Game by hyliansyrup
+  </div>
+</div>
+
+<script>
+const player = document.getElementById('player');
+const gameContainer = document.getElementById('game-container');
+const scoreElement = document.getElementById('score');
+const healthElement = document.getElementById('health');
+const timeElement = document.getElementById('time');
+const levelElement = document.getElementById('level');
+const lollipopsCaughtElement = document.getElementById('lollipops-caught');
+const bombsCaughtElement = document.getElementById('bombs-caught');
+const potionsCaughtElement = document.getElementById('potions-caught');
+const gameOverScreen = document.getElementById('game-over');
+const levelCompleteScreen = document.getElementById('level-complete');
+const startScreen = document.getElementById('start-screen');
+const finalScoreElement = document.getElementById('final-score');
+const levelScoreElement = document.getElementById('level-score');
+const restartBtn = document.getElementById('restart-btn');
+const nextLevelBtn = document.getElementById('next-level-btn');
+const startBtn = document.getElementById('start-btn');
+const pauseBtn = document.getElementById('pause-btn');
+const landscape = document.getElementById('landscape');
+const scoreObjectiveElement = document.getElementById('score-objective');
+const timeLeftElement = document.getElementById('time-left');
+const gameTitle = document.getElementById('game-title');
+
+let score = 0;
+let health = 0;
+let timeLeft = 60;
+let level = 1;
+let gameInterval;
+let spawnInterval;
+let potionInterval;
+let isGameOver = false;
+let isPaused = false;
+let lollipopsCaught = 0;
+let bombsCaught = 0;
+let potionsCaught = 0;
+let scoreObjective = 300;
+
+function updatePlayerPosition(e) {
+  let x, y;
+  if (e.type === 'mousemove') {
+    x = e.clientX - player.offsetWidth / 2;
+    y = e.clientY - player.offsetHeight / 2;
+  } else if (e.type === 'touchmove') {
+    e.preventDefault();
+    const touch = e.touches[0];
+    x = touch.clientX - player.offsetWidth / 2;
+    y = touch.clientY - player.offsetHeight / 2;
+  }
+  player.style.left = `${x}px`;
+  player.style.top = `${y}px`;
+}
+
+function createCloud() {
+  const cloud = document.createElement('div');
+  cloud.classList.add('cloud');
+  cloud.style.top = Math.random() * 50 + '%';
+  cloud.style.width = Math.random() * 150 + 100 + 'px';
+  cloud.style.height = 'auto';
+  cloud.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100">
+      <defs>
+        <linearGradient id="cloudGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#E6E6FA;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <path d="M25,60 Q35,30 50,50 Q70,20 90,50 Q110,30 130,50 Q145,30 160,50 Q180,40 190,60 A20,20 0 0,1 170,80 L50,80 A20,20 0 0,1 25,60" fill="url(#cloudGradient)"/>
+    </svg>`;
+  cloud.style.animationDuration = Math.random() * 20 + 30 + 's';
+  gameContainer.appendChild(cloud);
+  setTimeout(() => gameContainer.removeChild(cloud), 50000);
+}
+
+function spawnItem() {
+  if (isPaused || isGameOver) return;
+  
+  const item = document.createElement('div');
+  item.classList.add('item');
+  const itemType = Math.random();
+  if (itemType < 0.6) {
+    item.classList.add('lollipop');
+  } else if (itemType < 0.9) {
+    item.classList.add('bomb');
+  } else {
+    item.classList.add('health-potion');
+  }
+  item.style.left = Math.random() * (gameContainer.clientWidth - 60) + 'px';
+  item.style.top = '-60px';
+  gameContainer.appendChild(item);
+
+  const fallSpeed = 2 + level * 0.5;
+  const fallInterval = setInterval(() => {
+    if (isPaused || isGameOver) return;
+    
+    const currentTop = parseInt(item.style.top);
+    if (currentTop > gameContainer.clientHeight) {
+      clearInterval(fallInterval);
+      gameContainer.removeChild(item);
+      if (item.classList.contains('lollipop')) {
+        health = Math.max(0, health - 1);
+        healthElement.textContent = health;
+        if (health <= 0) {
+          endGame();
+        }
+      }
+    } else {
+      item.style.top = (currentTop + fallSpeed) + 'px';
+      checkCollision(item);
+    }
+  }, 20);
+}
+
+function checkCollision(item) {
+  const playerRect = player.getBoundingClientRect();
+  const itemRect = item.getBoundingClientRect();
+
+  if (
+    playerRect.left < itemRect.right &&
+    playerRect.right > itemRect.left &&
+    playerRect.top < itemRect.bottom &&
+    playerRect.bottom > itemRect.top
+  ) {
+    gameContainer.removeChild(item);
+    if (item.classList.contains('lollipop')) {
+      score += 10;
+      scoreElement.textContent = score;
+      lollipopsCaught++;
+      lollipopsCaughtElement.textContent = lollipopsCaught;
+      health = Math.min(100, health + 5);
+      healthElement.textContent = health;
+    } else if (item.classList.contains('bomb')) {
+      health = Math.max(0, health - 30);
+      healthElement.textContent = health;
+      bombsCaught++;
+      bombsCaughtElement.textContent = bombsCaught;
+      createExplosion(itemRect.left, itemRect.top);
+      if (health <= 0) {
+        endGame();
+      }
+    } else if (item.classList.contains('health-potion')) {
+      health = Math.min(100, health + 10);
+      healthElement.textContent = health;
+      potionsCaught++;
+      potionsCaughtElement.textContent = potionsCaught;
+    }
+  }
+}
+
+function createExplosion(x, y) {
+  const explosion = document.createElement('div');
+  explosion.classList.add('explosion');
+  explosion.style.left = x + 'px';
+  explosion.style.top = y + 'px';
+  gameContainer.appendChild(explosion);
+  setTimeout(() => gameContainer.removeChild(explosion), 500);
+}
+
+function updateTime() {
+  if (isPaused || isGameOver) return;
+  
+  timeLeft--;
+  timeElement.textContent = timeLeft;
+  timeLeftElement.textContent = timeLeft;
+  if (timeLeft <= 0) {
+    if (score >= scoreObjective) {
+      completeLevel();
+    } else {
+      endGame();
+    }
+  }
+}
+
+function completeLevel() {
+  clearInterval(gameInterval);
+  clearInterval(spawnInterval);
+  levelScoreElement.textContent = score;
+  levelCompleteScreen.style.display = 'block';
+  createConfetti();
+}
+
+function createConfetti() {
+  for (let i = 0; i < 100; i++) {
+    const confetti = document.createElement('div');
+    confetti.classList.add('confetti');
+    confetti.style.left = Math.random() * 100 + 'vw';
+    confetti.style.animationDelay = Math.random() * 4 + 's';
+    confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+    gameContainer.appendChild(confetti);
+  }
+}
+
+function updateLevel() {
+  level++;
+  levelElement.textContent = level;
+  scoreObjective += 100;
+  scoreObjectiveElement.textContent = scoreObjective;
+  clearInterval(spawnInterval);
+  spawnInterval = setInterval(spawnItem, Math.max(200, 1000 - (level * 100)));
+}
+
+function createSparkle() {
+  const sparkle = document.createElement('div');
+  sparkle.classList.add('sparkle');
+  sparkle.style.left = Math.random() * 100 + '%';
+  sparkle.style.top = Math.random() * 100 + '%';
+  gameContainer.appendChild(sparkle);
+  setTimeout(() => gameContainer.removeChild(sparkle), 1000);
+}
+
+function createTree() {
+  const tree = document.createElement('div');
+  tree.classList.add('tree');
+  tree.style.left = Math.random() * (gameContainer.clientWidth - 40) + 'px';
+  landscape.appendChild(tree);
+}
+
+function createBubble() {
+  const bubble = document.createElement('div');
+  bubble.classList.add('bubble');
+  bubble.style.left = Math.random() * 100 + '%';
+  bubble.style.bottom = '-50px';
+  bubble.style.width = Math.random() * 30 + 10 + 'px';
+  bubble.style.height = bubble.style.width;
+  gameContainer.appendChild(bubble);
+  setTimeout(() => gameContainer.removeChild(bubble), 10000);
+}
+
+function createTitleSparkle() {
+  const sparkle = document.createElement('div');
+  sparkle.classList.add('title-sparkle');
+  const titleRect = gameTitle.getBoundingClientRect();
+  sparkle.style.left = (Math.random() * titleRect.width + titleRect.left) + 'px';
+  sparkle.style.top = (Math.random() * titleRect.height + titleRect.top) + 'px';
+  document.body.appendChild(sparkle);
+  setTimeout(() => document.body.removeChild(sparkle), 2000);
+}
+
+function startGame() {
+  score = 0;
+  health = 100;
+  timeLeft = 60;
+  level = 1;
+  lollipopsCaught = 0;
+  bombsCaught = 0;
+  potionsCaught = 0;
+  scoreObjective = 300;
+  isGameOver = false;
+  isPaused = false;
+
+  scoreElement.textContent = score;
+  healthElement.textContent = health;
+  timeElement.textContent = timeLeft;
+  levelElement.textContent = level;
+  lollipopsCaughtElement.textContent = lollipopsCaught;
+  bombsCaughtElement.textContent = bombsCaught;
+  potionsCaughtElement.textContent = potionsCaught;
+  scoreObjectiveElement.textContent = scoreObjective;
+  timeLeftElement.textContent = timeLeft;
+
+  gameOverScreen.style.display = 'none';
+  levelCompleteScreen.style.display = 'none';
+  startScreen.style.display = 'none';
+  pauseBtn.textContent = 'Pause';
+
+  // Hide the game title
+  gameTitle.style.opacity = '0';
+
+  // Clear existing trees, confetti, and bubbles
+  landscape.innerHTML = '';
+  document.querySelectorAll('.confetti').forEach(el => el.remove());
+  document.querySelectorAll('.bubble').forEach(el => el.remove());
+
+  // Create new trees
+  for (let i = 0; i < 5; i++) {
+    createTree();
+  }
+
+  gameInterval = setInterval(() => {
+    updateTime();
+    if (Math.random() < 0.1) {
+      createCloud();
+    }
+    if (Math.random() < 0.3) {
+      createSparkle();
+    }
+    if (Math.random() < 0.1) {
+      createBubble();
+    }
+    if (Math.random() < 0.2) {
+      createTitleSparkle();
+    }
+  }, 1000);
+
+  spawnInterval = setInterval(spawnItem, 1000);
+}
+
+function endGame() {
+  isGameOver = true;
+  clearInterval(gameInterval);
+  clearInterval(spawnInterval);
+  finalScoreElement.textContent = score;
+  gameOverScreen.style.display = 'block';
+
+  // Show the game title again
+  gameTitle.style.opacity = '1';
+
+  // Freeze all animations
+  document.querySelectorAll('.item, .cloud, .sparkle, .bubble, .confetti').forEach(el => {
+    el.style.animationPlayState = 'paused';
+  });
+
+  if (score < scoreObjective) {
+    alert(`You need to score at least ${scoreObjective} points! Try again!`);
+  }
+}
+
+function togglePause() {
+  isPaused = !isPaused;
+  if (isPaused) {
+    clearInterval(gameInterval);
+    clearInterval(spawnInterval);
+    pauseBtn.textContent = 'Resume';
+    // Show the game title when paused
+    gameTitle.style.opacity = '1';
+    // Pause all animations
+    document.querySelectorAll('.item, .cloud, .sparkle, .bubble, .confetti').forEach(el => {
+      el.style.animationPlayState = 'paused';
+    });
+  } else {
+    gameInterval = setInterval(updateTime, 1000);
+    spawnInterval = setInterval(spawnItem, Math.max(200, 1000 - (level * 100)));
+    pauseBtn.textContent = 'Pause';
+    // Hide the game title when resumed
+    gameTitle.style.opacity = '0';
+    // Resume all animations
+    document.querySelectorAll('.item, .cloud, .sparkle, .bubble, .confetti').forEach(el => {
+      el.style.animationPlayState = 'running';
+    });
+  }
+}
+
+gameContainer.addEventListener('mousemove', updatePlayerPosition);
+gameContainer.addEventListener('touchmove', updatePlayerPosition, { passive: false });
+restartBtn.addEventListener('click', startGame);
+nextLevelBtn.addEventListener('click', () => {
+  levelCompleteScreen.style.display = 'none';
+  updateLevel();
+  startGame();
+});
+startBtn.addEventListener('click', startGame);
+pauseBtn.addEventListener('click', togglePause);
+
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    togglePause();
+  }
+});
+
+// Show start screen initially
+startScreen.style.display = 'block';
+
+// Create initial set of bubbles and title sparkles
+for (let i = 0; i < 20; i++) {
+  setTimeout(createBubble, Math.random() * 5000);
+  setTimeout(createTitleSparkle, Math.random() * 5000);
+}
+</script>
+</body></html>
