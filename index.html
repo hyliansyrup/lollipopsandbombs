@@ -1,5 +1,6 @@
-<html><head><base href="https://websim.ai/lollipops-and-bombs-v13/">
-<title>Lollipops and Bombs v13</title>
+
+<html><head><base>
+<title>Lollipops and Bombs v16</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
@@ -41,12 +42,12 @@
     background-size: contain;
     background-repeat: no-repeat;
     transition: transform 0.2s ease-in-out;
+    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));
   }
   .item:hover {
     transform: scale(1.1);
   }
   .lollipop {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="lollipopGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:%23FF69B4;stop-opacity:1" /><stop offset="100%" style="stop-color:%23FFB6C1;stop-opacity:1" /></linearGradient></defs><circle cx="50" cy="35" r="30" fill="url(%23lollipopGradient)"/><rect x="48" y="60" width="4" height="35" fill="%23A0522D"/></svg>');
     animation: spin 3s linear infinite;
   }
   .bomb {
@@ -54,7 +55,7 @@
     animation: shake 0.5s linear infinite;
   }
   .health-potion {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="potionGradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%2300FF00;stop-opacity:1" /><stop offset="100%" style="stop-color:%23008000;stop-opacity:1" /></linearGradient></defs><path d="M40,20 h20 v20 q20,0 20,20 v30 q0,10 -10,10 h-40 q-10,0 -10,-10 v-30 q0,-20 20,-20 z" fill="url(%23potionGradient)"/><rect x="45" y="5" width="10" height="15" fill="%23A0522D"/></svg>');
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="potionGradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%2300FF00;stop-opacity:0.8" /><stop offset="100%" style="stop-color:%23008000;stop-opacity:0.8" /></linearGradient></defs><path d="M40,20 h20 v20 q20,0 20,20 v30 q0,10 -10,10 h-40 q-10,0 -10,-10 v-30 q0,-20 20,-20 z" fill="url(%23potionGradient)"/><rect x="45" y="5" width="10" height="15" fill="%23A0522D"/><ellipse cx="50" cy="50" rx="25" ry="10" fill="rgba(255,255,255,0.3)"/></svg>');
     animation: float 2s ease-in-out infinite;
   }
   @keyframes spin {
@@ -113,7 +114,7 @@
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.3s, transform 0.1s;
+    transition: background-color 0.3s, transform 0.1s, opacity 0.5s;
   }
   #restart-btn:hover, #next-level-btn:hover, #start-btn:hover {
     background-color: #0056b3;
@@ -231,7 +232,7 @@
     font-family: 'Bubblegum Sans', cursive;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     animation: rainbow-text 5s linear infinite, bubble 2s ease-in-out infinite;
-    transition: opacity 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
   }
   @keyframes rainbow-text {
     0% { color: #ff9a9e; }
@@ -244,6 +245,11 @@
   @keyframes bubble {
     0%, 100% { transform: translateX(-50%) scale(1); }
     50% { transform: translateX(-50%) scale(1.1); }
+  }
+  @keyframes pop {
+    0% { transform: translateX(-50%) scale(1); opacity: 1; }
+    50% { transform: translateX(-50%) scale(1.2); opacity: 0.5; }
+    100% { transform: translateX(-50%) scale(0); opacity: 0; }
   }
   .title-sparkle {
     position: absolute;
@@ -265,6 +271,29 @@
     font-size: 12px;
     color: #666;
     text-align: right;
+  }
+  #rules {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 30px;
+    border-radius: 20px;
+    text-align: left;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    max-width: 80%;
+    transition: opacity 0.5s ease-in-out;
+  }
+  #rules h2 {
+    text-align: center;
+    color: #007AFF;
+  }
+  #rules ul {
+    padding-left: 20px;
+  }
+  #rules li {
+    margin-bottom: 10px;
   }
 </style>
 </head>
@@ -304,6 +333,19 @@
     <p>Catch lollipops, avoid bombs, and collect health potions!</p>
     <button id="start-btn">Start Game</button>
   </div>
+  <div id="rules">
+    <h2>Game Rules</h2>
+    <ul>
+      <li>Move the cat with your mouse or finger to catch items.</li>
+      <li>Catch lollipops to increase your score (+10 points each).</li>
+      <li>Avoid bombs or you'll lose health (-30 health points each).</li>
+      <li>Collect health potions to restore health (+10 health points each).</li>
+      <li>Reach the score objective before time runs out to advance to the next level.</li>
+      <li>The game gets faster and more challenging with each level.</li>
+      <li>Game over if your health reaches zero or time runs out before reaching the objective.</li>
+    </ul>
+    <button id="start-btn">Start Game</button>
+  </div>
   <div id="landscape"></div>
   <div id="credits">
     Cat character by @MiuuStudio<br>
@@ -334,6 +376,7 @@ const landscape = document.getElementById('landscape');
 const scoreObjectiveElement = document.getElementById('score-objective');
 const timeLeftElement = document.getElementById('time-left');
 const gameTitle = document.getElementById('game-title');
+const rulesScreen = document.getElementById('rules');
 
 let score = 0;
 let health = 0;
@@ -348,6 +391,68 @@ let lollipopsCaught = 0;
 let bombsCaught = 0;
 let potionsCaught = 0;
 let scoreObjective = 300;
+let gameSpeed = 1;
+
+const lollipopShapes = [
+  'circle',
+  'square',
+  'triangle',
+  'heart',
+  'star',
+  'diamond'
+];
+
+function getLollipopSVG(shape) {
+  const colors = ['#FF69B4', '#FFB6C1', '#FFC0CB', '#FF1493', '#DB7093', '#C71585'];
+  const color1 = colors[Math.floor(Math.random() * colors.length)];
+  const color2 = colors[Math.floor(Math.random() * colors.length)];
+  const stickColor = '#A0522D';
+
+  const gradientId = `lollipopGradient${Math.random().toString(36).substr(2, 9)}`;
+  const patternId = `lollipopPattern${Math.random().toString(36).substr(2, 9)}`;
+
+  let shapePath;
+  switch (shape) {
+    case 'circle':
+      shapePath = `<circle cx="50" cy="35" r="30" fill="url(#${gradientId})" />`;
+      break;
+    case 'square':
+      shapePath = `<rect x="20" y="5" width="60" height="60" fill="url(#${gradientId})" />`;
+      break;
+    case 'triangle':
+      shapePath = `<polygon points="50,5 80,65 20,65" fill="url(#${gradientId})" />`;
+      break;
+    case 'heart':
+      shapePath = `<path d="M50,20 C50,20 35,0 20,0 C0,0 0,20 0,20 C0,40 50,70 50,70 C50,70 100,40 100,20 C100,20 100,0 80,0 C65,0 50,20 50,20 Z" fill="url(#${gradientId})" />`;
+      break;
+    case 'star':
+      shapePath = `<polygon points="50,5 61,39 97,39 68,61 79,95 50,73 21,95 32,61 3,39 39,39" fill="url(#${gradientId})" />`;
+      break;
+    case 'diamond':
+      shapePath = `<polygon points="50,5 80,50 50,95 20,50" fill="url(#${gradientId})" />`;
+      break;
+    default:
+      shapePath = `<circle cx="50" cy="35" r="30" fill="url(#${gradientId})" />`;
+  }
+
+  return `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${color1};stop-opacity:1" />
+          <stop offset="100%" style="stop-color:${color2};stop-opacity:1" />
+        </linearGradient>
+        <pattern id="${patternId}" patternUnits="userSpaceOnUse" width="10" height="10">
+          <rect width="10" height="10" fill="url(#${gradientId})" />
+          <rect width="5" height="5" fill="${color1}" />
+          <rect x="5" y="5" width="5" height="5" fill="${color2}" />
+        </pattern>
+      </defs>
+      ${shapePath}
+      <rect x="48" y="60" width="4" height="35" fill="${stickColor}"/>
+      <ellipse cx="50" cy="35" rx="25" ry="10" fill="rgba(255,255,255,0.3)" />
+    </svg>`;
+}
 
 function updatePlayerPosition(e) {
   let x, y;
@@ -393,6 +498,8 @@ function spawnItem() {
   const itemType = Math.random();
   if (itemType < 0.6) {
     item.classList.add('lollipop');
+    const shape = lollipopShapes[(level - 1) % lollipopShapes.length];
+    item.innerHTML = getLollipopSVG(shape);
   } else if (itemType < 0.9) {
     item.classList.add('bomb');
   } else {
@@ -402,7 +509,7 @@ function spawnItem() {
   item.style.top = '-60px';
   gameContainer.appendChild(item);
 
-  const fallSpeed = 2 + level * 0.5;
+  const fallSpeed = (2 + level * 0.5) * gameSpeed;
   const fallInterval = setInterval(() => {
     if (isPaused || isGameOver) return;
     
@@ -509,6 +616,7 @@ function updateLevel() {
   scoreObjective += 100;
   scoreObjectiveElement.textContent = scoreObjective;
   clearInterval(spawnInterval);
+  gameSpeed += 0.1;
   spawnInterval = setInterval(spawnItem, Math.max(200, 1000 - (level * 100)));
 }
 
@@ -560,124 +668,108 @@ function startGame() {
   scoreObjective = 300;
   isGameOver = false;
   isPaused = false;
+  gameSpeed = 1;
 
   scoreElement.textContent = score;
   healthElement.textContent = health;
   timeElement.textContent = timeLeft;
   levelElement.textContent = level;
-  lollipopsCaughtElement.textContent = lollipopsCaught;
-  bombsCaughtElement.textContent = bombsCaught;
-  potionsCaughtElement.textContent = potionsCaught;
-  scoreObjectiveElement.textContent = scoreObjective;
-  timeLeftElement.textContent = timeLeft;
+lollipopsCaughtElement.textContent = lollipopsCaught;
+bombsCaughtElement.textContent = bombsCaught;
+potionsCaughtElement.textContent = potionsCaught;
+scoreObjectiveElement.textContent = scoreObjective;
+timeLeftElement.textContent = timeLeft;
 
-  gameOverScreen.style.display = 'none';
-  levelCompleteScreen.style.display = 'none';
-  startScreen.style.display = 'none';
-  pauseBtn.textContent = 'Pause';
+gameOverScreen.style.display = 'none';
+levelCompleteScreen.style.display = 'none';
+startScreen.style.display = 'none';
+rulesScreen.style.display = 'none';
 
-  // Hide the game title
-  gameTitle.style.opacity = '0';
+gameTitle.style.animation = 'pop 0.5s ease-in-out forwards';
+setTimeout(() => {
+  gameTitle.style.display = 'none';
+}, 500);
 
-  // Clear existing trees, confetti, and bubbles
-  landscape.innerHTML = '';
-  document.querySelectorAll('.confetti').forEach(el => el.remove());
-  document.querySelectorAll('.bubble').forEach(el => el.remove());
-
-  // Create new trees
-  for (let i = 0; i < 5; i++) {
-    createTree();
+gameInterval = setInterval(updateTime, 1000);
+spawnInterval = setInterval(spawnItem, 1000);
+potionInterval = setInterval(() => {
+  if (Math.random() < 0.5) {
+    spawnItem();
   }
+}, 10000);
 
-  gameInterval = setInterval(() => {
-    updateTime();
-    if (Math.random() < 0.1) {
-      createCloud();
-    }
-    if (Math.random() < 0.3) {
-      createSparkle();
-    }
-    if (Math.random() < 0.1) {
-      createBubble();
-    }
-    if (Math.random() < 0.2) {
-      createTitleSparkle();
-    }
-  }, 1000);
+setInterval(createCloud, 10000);
+setInterval(createSparkle, 500);
+setInterval(createBubble, 1000);
 
-  spawnInterval = setInterval(spawnItem, 1000);
+for (let i = 0; i < 5; i++) {
+  createTree();
+}
+
+gameContainer.style.cursor = 'none';
+player.style.display = 'block';
 }
 
 function endGame() {
-  isGameOver = true;
-  clearInterval(gameInterval);
-  clearInterval(spawnInterval);
-  finalScoreElement.textContent = score;
-  gameOverScreen.style.display = 'block';
-
-  // Show the game title again
-  gameTitle.style.opacity = '1';
-
-  // Freeze all animations
-  document.querySelectorAll('.item, .cloud, .sparkle, .bubble, .confetti').forEach(el => {
-    el.style.animationPlayState = 'paused';
-  });
-
-  if (score < scoreObjective) {
-    alert(`You need to score at least ${scoreObjective} points! Try again!`);
-  }
+isGameOver = true;
+clearInterval(gameInterval);
+clearInterval(spawnInterval);
+clearInterval(potionInterval);
+finalScoreElement.textContent = score;
+gameOverScreen.style.display = 'block';
+gameContainer.style.cursor = 'default';
 }
 
 function togglePause() {
-  isPaused = !isPaused;
-  if (isPaused) {
-    clearInterval(gameInterval);
-    clearInterval(spawnInterval);
-    pauseBtn.textContent = 'Resume';
-    // Show the game title when paused
-    gameTitle.style.opacity = '1';
-    // Pause all animations
-    document.querySelectorAll('.item, .cloud, .sparkle, .bubble, .confetti').forEach(el => {
-      el.style.animationPlayState = 'paused';
-    });
-  } else {
-    gameInterval = setInterval(updateTime, 1000);
-    spawnInterval = setInterval(spawnItem, Math.max(200, 1000 - (level * 100)));
-    pauseBtn.textContent = 'Pause';
-    // Hide the game title when resumed
-    gameTitle.style.opacity = '0';
-    // Resume all animations
-    document.querySelectorAll('.item, .cloud, .sparkle, .bubble, .confetti').forEach(el => {
-      el.style.animationPlayState = 'running';
-    });
-  }
+isPaused = !isPaused;
+if (isPaused) {
+  clearInterval(gameInterval);
+  clearInterval(spawnInterval);
+  pauseBtn.textContent = 'Resume';
+  gameContainer.style.cursor = 'default';
+} else {
+  gameInterval = setInterval(updateTime, 1000);
+  spawnInterval = setInterval(spawnItem, Math.max(200, 1000 - (level * 100)));
+  pauseBtn.textContent = 'Pause';
+  gameContainer.style.cursor = 'none';
+}
 }
 
 gameContainer.addEventListener('mousemove', updatePlayerPosition);
-gameContainer.addEventListener('touchmove', updatePlayerPosition, { passive: false });
+gameContainer.addEventListener('touchmove', updatePlayerPosition);
 restartBtn.addEventListener('click', startGame);
 nextLevelBtn.addEventListener('click', () => {
-  levelCompleteScreen.style.display = 'none';
-  updateLevel();
-  startGame();
+updateLevel();
+startGame();
 });
-startBtn.addEventListener('click', startGame);
+startBtn.addEventListener('click', () => {
+startGame();
+rulesScreen.style.opacity = '0';
+setTimeout(() => {
+  rulesScreen.style.display = 'none';
+}, 500);
+});
 pauseBtn.addEventListener('click', togglePause);
 
-document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') {
-    e.preventDefault();
-    togglePause();
-  }
+setInterval(createCloud, 10000);
+setInterval(createSparkle, 500);
+setInterval(createTitleSparkle, 500);
+
+document.querySelectorAll('#start-btn').forEach(btn => {
+btn.addEventListener('click', () => {
+  startGame();
+  rulesScreen.style.opacity = '0';
+  setTimeout(() => {
+    rulesScreen.style.display = 'none';
+  }, 500);
+});
 });
 
-// Show start screen initially
-startScreen.style.display = 'block';
-
-// Create initial set of bubbles and title sparkles
-for (let i = 0; i < 20; i++) {
-  setTimeout(createBubble, Math.random() * 5000);
-  setTimeout(createTitleSparkle, Math.random() * 5000);
+// Initialize the game
+for (let i = 0; i < 5; i++) {
+createTree();
 }
+createCloud();
 </script>
-</body></html>
+</body>
+</html>
